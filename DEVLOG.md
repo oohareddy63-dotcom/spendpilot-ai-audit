@@ -15,3 +15,7 @@ Need to finalize frontend SaaS layout and formalize pricing-based audit decision
 
 **Plan for tomorrow:**
 Build the premium landing page and dynamic AI spend audit form UI.
+
+---
+
+_Next entry: Day 2 — Landing page + audit form UI._
