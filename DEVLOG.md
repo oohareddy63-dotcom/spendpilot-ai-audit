@@ -18,4 +18,18 @@ Build the premium landing page and dynamic AI spend audit form UI.
 
 ---
 
-_Next entry: Day 2 — Landing page + audit form UI._
+## Day 2 — 2026-05-07
+
+**Hours worked:** 6
+
+**What I did:**
+Built the primary frontend experience including routing, landing page sections, reusable navigation, and the dynamic AI spend audit form. Added localStorage persistence to maintain form state across reloads and improved visual polish using a dark SaaS-inspired UI system.
+
+**What I learned:**
+UI quality strongly affects perceived product credibility. Structuring the form dynamically early makes future audit engine integration significantly easier.
+
+**Blockers / what I'm stuck on:**
+Need to formalize audit recommendation logic and pricing thresholds before backend implementation.
+
+**Plan for tomorrow:**
+Build the backend audit engine and connect the frontend form submission flow.
