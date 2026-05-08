@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { v4 as uuidv4 } from "uuid";
 import Navbar from "../components/Navbar";
 import { tools, toolNames, useCases } from "../data/tools";
+import API from "../services/api";
 
 const defaultRow = () => ({
   id: uuidv4(),
@@ -99,11 +100,42 @@ export default function AuditFormPage() {
     return sum + spend * seats;
   }, 0);
 
-  const handleSubmit = (e) => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Save results stub and navigate
-    localStorage.setItem("auditResults", JSON.stringify({ formData, submittedAt: new Date().toISOString() }));
-    navigate("/results");
+    setLoading(true);
+    setError(null);
+
+    // Shape data for the API
+    const payload = {
+      teamSize: formData.teamSize,
+      useCase: formData.useCase,
+      tools: formData.rows.map((r) => ({
+        name: r.tool,
+        plan: r.plan,
+        seats: parseInt(r.seats) || 1,
+        spend: parseFloat(r.monthlySpend) || 0,
+      })),
+    };
+
+    try {
+      const response = await API.post("/audit", payload);
+      // Persist full audit result (form + API response) to localStorage
+      const auditResults = {
+        formData,
+        auditData: response.data,
+        submittedAt: new Date().toISOString(),
+      };
+      localStorage.setItem("auditResults", JSON.stringify(auditResults));
+      navigate("/results");
+    } catch (err) {
+      console.error(err);
+      setError("Could not reach the audit server. Make sure the backend is running on port 5000.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -355,52 +387,72 @@ export default function AuditFormPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
-            style={{ display: "flex", justifyContent: "flex-end", gap: 12 }}
           >
-            <button
-              type="button"
-              onClick={() => {
-                setFormData(defaultForm);
-                localStorage.removeItem("auditForm");
-              }}
-              style={{
-                background: "transparent",
-                border: "1px solid rgba(255,255,255,0.1)",
+            {error && (
+              <div style={{
+                background: "rgba(239,68,68,0.1)",
+                border: "1px solid rgba(239,68,68,0.3)",
                 borderRadius: 10,
-                color: "rgba(255,255,255,0.5)",
-                padding: "12px 24px",
+                padding: "12px 16px",
+                color: "#f87171",
                 fontSize: 14,
-                fontWeight: 600,
-                cursor: "pointer",
-              }}
-            >
-              Reset
-            </button>
-            <button
-              type="submit"
-              style={{
-                background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
-                color: "white",
-                border: "none",
-                borderRadius: 10,
-                padding: "12px 32px",
-                fontSize: 15,
-                fontWeight: 700,
-                cursor: "pointer",
-                boxShadow: "0 0 24px rgba(99,102,241,0.35)",
-                transition: "transform 0.2s, box-shadow 0.2s",
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.transform = "translateY(-1px)";
-                e.target.style.boxShadow = "0 0 36px rgba(99,102,241,0.5)";
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.transform = "translateY(0)";
-                e.target.style.boxShadow = "0 0 24px rgba(99,102,241,0.35)";
-              }}
-            >
-              Run Audit →
-            </button>
+                marginBottom: 16,
+              }}>
+                ⚠ {error}
+              </div>
+            )}
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: 12 }}>
+              <button
+                type="button"
+                onClick={() => {
+                  setFormData(defaultForm);
+                  localStorage.removeItem("auditForm");
+                }}
+                style={{
+                  background: "transparent",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  borderRadius: 10,
+                  color: "rgba(255,255,255,0.5)",
+                  padding: "12px 24px",
+                  fontSize: 14,
+                  fontWeight: 600,
+                  cursor: "pointer",
+                }}
+              >
+                Reset
+              </button>
+              <button
+                type="submit"
+                disabled={loading}
+                style={{
+                  background: loading
+                    ? "rgba(99,102,241,0.4)"
+                    : "linear-gradient(135deg, #6366f1, #8b5cf6)",
+                  color: "white",
+                  border: "none",
+                  borderRadius: 10,
+                  padding: "12px 32px",
+                  fontSize: 15,
+                  fontWeight: 700,
+                  cursor: loading ? "not-allowed" : "pointer",
+                  boxShadow: loading ? "none" : "0 0 24px rgba(99,102,241,0.35)",
+                  transition: "transform 0.2s, box-shadow 0.2s",
+                  minWidth: 160,
+                }}
+                onMouseEnter={(e) => {
+                  if (!loading) {
+                    e.target.style.transform = "translateY(-1px)";
+                    e.target.style.boxShadow = "0 0 36px rgba(99,102,241,0.5)";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.transform = "translateY(0)";
+                  e.target.style.boxShadow = loading ? "none" : "0 0 24px rgba(99,102,241,0.35)";
+                }}
+              >
+                {loading ? "Analyzing..." : "Run Audit →"}
+              </button>
+            </div>
           </motion.div>
         </form>
       </div>
