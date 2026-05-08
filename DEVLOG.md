@@ -33,3 +33,21 @@ Need to formalize audit recommendation logic and pricing thresholds before backe
 
 **Plan for tomorrow:**
 Build the backend audit engine and connect the frontend form submission flow.
+
+---
+
+## Day 3 — 2026-05-08
+
+**Hours worked:** 7
+
+**What I did:**
+Built the backend audit engine with 20 rule-based recommendations covering plan downgrades, tool overlap detection, team-size mismatches, and spend anomalies. Connected the Express API to the React frontend — the form now POSTs to `/api/audit` and the results page renders real recommendations with severity levels and savings calculations. Rebuilt the results dashboard to display per-recommendation cards, insight flags, a spend breakdown chart, and a conditional Credex CTA based on savings threshold.
+
+**What I learned:**
+Rule-based audit logic needs to be financially defensible — every recommendation must have a clear business rationale tied to real pricing data. Vague suggestions destroy credibility. Also learned that structuring the API response with `summary`, `recommendations`, and `flags` as separate arrays makes the frontend much easier to render conditionally.
+
+**Blockers / what I'm stuck on:**
+Need to add MongoDB persistence so audit results survive beyond localStorage. Also want to add email delivery of the report via Resend.
+
+**Plan for tomorrow:**
+Add MongoDB models, persist audit results to DB, implement shareable report links backed by DB, and add Resend email delivery.
