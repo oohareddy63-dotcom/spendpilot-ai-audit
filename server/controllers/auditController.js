@@ -6,11 +6,9 @@ const { v4: uuidv4 } = require("uuid");
 const generateAudit = async (req, res) => {
   try {
     const { tools, teamSize, useCase } = req.body;
-
     if (!tools || !Array.isArray(tools) || tools.length === 0) {
       return res.status(400).json({ error: "tools array is required" });
     }
-
     // 1. Run rule-based audit engine
     const auditResult = runAudit({ tools, teamSize, useCase });
 
