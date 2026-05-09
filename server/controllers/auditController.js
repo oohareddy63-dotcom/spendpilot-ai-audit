@@ -2,7 +2,6 @@ const { runAudit } = require("../services/auditEngine");
 const { generateAISummary } = require("../services/aiSummaryService");
 const Audit = require("../models/Audit");
 const { v4: uuidv4 } = require("uuid");
-
 const generateAudit = async (req, res) => {
   try {
     const { tools, teamSize, useCase } = req.body;
