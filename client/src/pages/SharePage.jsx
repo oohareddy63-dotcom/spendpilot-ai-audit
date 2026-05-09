@@ -2,26 +2,83 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import Navbar from "../components/Navbar";
+import API from "../services/api";
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 20 },
+  visible: (i = 0) => ({ opacity: 1, y: 0, transition: { duration: 0.5, delay: i * 0.08 } }),
+};
+
+const severityColor = {
+  high:   { bg: "rgba(239,68,68,0.08)",   border: "rgba(239,68,68,0.2)",   text: "#f87171" },
+  medium: { bg: "rgba(251,146,60,0.08)",  border: "rgba(251,146,60,0.2)",  text: "#fb923c" },
+  low:    { bg: "rgba(250,204,21,0.06)",  border: "rgba(250,204,21,0.15)", text: "#fbbf24" },
+};
 
 export default function SharePage() {
   const { id } = useParams();
-  const [results, setResults] = useState(null);
+  const [report, setReport] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(`share_${id}`);
-      if (saved) setResults(JSON.parse(saved));
-    } catch {
-      // ignore
-    }
+    const fetchReport = async () => {
+      // 1. Try the API (DB-backed)
+      try {
+        const res = await API.get(`/audit/${id}`);
+        setReport(res.data);
+        setLoading(false);
+        return;
+      } catch (apiErr) {
+        // API unavailable or not found — fall through to localStorage
+      }
+
+      // 2. Fallback: localStorage (for offline / dev without DB)
+      try {
+        const saved = localStorage.getItem(`share_${id}`);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          // Normalise shape — localStorage stores { formData, auditData }
+          setReport({
+            tools: parsed.formData?.rows?.map((r) => ({ name: r.tool, plan: r.plan, seats: r.seats, spend: r.monthlySpend })) ?? [],
+            recommendations: parsed.auditData?.recommendations ?? [],
+            flags: parsed.auditData?.flags ?? [],
+            summary: parsed.auditData?.summary ?? {},
+            aiSummary: parsed.auditData?.aiSummary ?? "",
+            shareId: id,
+            createdAt: parsed.submittedAt,
+          });
+          setLoading(false);
+          return;
+        }
+      } catch { /* ignore */ }
+
+      setError("Report not found or has expired.");
+      setLoading(false);
+    };
+
+    fetchReport();
   }, [id]);
 
-  if (!results) {
+  if (loading) {
     return (
       <div style={{ minHeight: "100vh", background: "#060816", display: "flex", alignItems: "center", justifyContent: "center" }}>
         <Navbar />
         <div style={{ textAlign: "center" }}>
-          <p style={{ color: "rgba(255,255,255,0.5)", marginBottom: 20 }}>Report not found or expired.</p>
+          <div style={{ width: 40, height: 40, border: "3px solid rgba(99,102,241,0.3)", borderTopColor: "#6366f1", borderRadius: "50%", animation: "spin 0.8s linear infinite", margin: "0 auto 16px" }} />
+          <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 14 }}>Loading report…</p>
+          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !report) {
+    return (
+      <div style={{ minHeight: "100vh", background: "#060816", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <Navbar />
+        <div style={{ textAlign: "center" }}>
+          <p style={{ color: "rgba(255,255,255,0.5)", marginBottom: 20 }}>{error ?? "Report not found."}</p>
           <Link to="/">
             <button style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)", color: "white", border: "none", borderRadius: 10, padding: "12px 24px", fontWeight: 700, cursor: "pointer" }}>
               Go Home
@@ -32,69 +89,116 @@ export default function SharePage() {
     );
   }
 
-  const { formData } = results;
-  const totalMonthly = formData.rows.reduce((sum, r) => {
-    return sum + (parseFloat(r.monthlySpend) || 0) * (parseInt(r.seats) || 1);
-  }, 0);
-  const totalAnnual = totalMonthly * 12;
+  const { tools, recommendations, flags, summary, aiSummary } = report;
+  const totalMonthly = summary?.totalCurrentMonthly ?? 0;
+  const totalAnnual = summary?.totalCurrentAnnual ?? totalMonthly * 12;
+  const savings = summary?.totalMonthlySavings ?? 0;
+  const annualSavings = summary?.totalAnnualSavings ?? savings * 12;
 
   return (
     <div style={{ minHeight: "100vh", background: "#060816" }}>
       <Navbar />
-      <div style={{ maxWidth: 720, margin: "0 auto", padding: "120px 24px 80px" }}>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <div
-            style={{
-              background: "rgba(99,102,241,0.08)",
-              border: "1px solid rgba(99,102,241,0.2)",
-              borderRadius: 8,
-              padding: "10px 16px",
-              marginBottom: 32,
-              fontSize: 13,
-              color: "#a5b4fc",
-            }}
-          >
-            📊 Shared AI Spend Report · Generated by SpendPilot
-          </div>
+      <div style={{ maxWidth: 800, margin: "0 auto", padding: "120px 24px 80px" }}>
 
-          <h1 style={{ fontSize: "clamp(24px, 4vw, 36px)", fontWeight: 800, letterSpacing: "-0.8px", color: "white", marginBottom: 8 }}>
+        {/* Shared badge */}
+        <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={0}
+          style={{ background: "rgba(99,102,241,0.08)", border: "1px solid rgba(99,102,241,0.2)", borderRadius: 8, padding: "10px 16px", marginBottom: 32, fontSize: 13, color: "#a5b4fc", display: "inline-flex", alignItems: "center", gap: 8 }}
+        >
+          📊 Shared AI Spend Report · Generated by SpendPilot
+        </motion.div>
+
+        {/* Header */}
+        <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={1} style={{ marginBottom: 36 }}>
+          <h1 style={{ fontSize: "clamp(26px, 4vw, 40px)", fontWeight: 800, letterSpacing: "-0.8px", color: "white", marginBottom: 8 }}>
             AI Spend Audit Report
           </h1>
-          <p style={{ color: "rgba(255,255,255,0.45)", fontSize: 14, marginBottom: 36 }}>
-            Team: {formData.teamSize} people · Use case: {formData.useCase}
-          </p>
+          {(summary?.teamSize || summary?.useCase) && (
+            <p style={{ color: "rgba(255,255,255,0.45)", fontSize: 14 }}>
+              {summary.teamSize && <>Team: <strong style={{ color: "white" }}>{summary.teamSize}</strong></>}
+              {summary.teamSize && summary.useCase && " · "}
+              {summary.useCase && <>Use case: <strong style={{ color: "white" }}>{summary.useCase}</strong></>}
+            </p>
+          )}
+        </motion.div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 32 }}>
-            {[
-              { label: "Monthly spend", value: `$${totalMonthly.toFixed(0)}` },
-              { label: "Annual spend", value: `$${totalAnnual.toFixed(0)}` },
-            ].map((c) => (
-              <div key={c.label} style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, padding: "20px", textAlign: "center" }}>
-                <div style={{ fontSize: 26, fontWeight: 800, color: "white" }}>{c.value}</div>
-                <div style={{ fontSize: 12, color: "rgba(255,255,255,0.4)", marginTop: 4 }}>{c.label}</div>
-              </div>
-            ))}
-          </div>
+        {/* Summary cards */}
+        <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={2}
+          style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 14, marginBottom: 32 }}
+        >
+          {[
+            { label: "Monthly spend",  value: `$${totalMonthly.toFixed(0)}`,  color: "#f87171" },
+            { label: "Annual spend",   value: `$${totalAnnual.toFixed(0)}`,   color: "#fb923c" },
+            { label: "Monthly savings",value: `$${savings.toFixed(0)}`,       color: "#34d399" },
+            { label: "Annual savings", value: `$${annualSavings.toFixed(0)}`, color: "#34d399" },
+          ].map((c) => (
+            <div key={c.label} style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, padding: "18px", textAlign: "center" }}>
+              <div style={{ fontSize: 22, fontWeight: 800, color: c.color }}>{c.value}</div>
+              <div style={{ fontSize: 12, color: "rgba(255,255,255,0.4)", marginTop: 4 }}>{c.label}</div>
+            </div>
+          ))}
+        </motion.div>
 
-          <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 14, padding: 24, marginBottom: 32 }}>
+        {/* AI Summary */}
+        {aiSummary && (
+          <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={3}
+            style={{ background: "linear-gradient(135deg, rgba(99,102,241,0.08), rgba(139,92,246,0.08))", border: "1px solid rgba(99,102,241,0.2)", borderRadius: 14, padding: 24, marginBottom: 28 }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+              <span style={{ fontSize: 18 }}>🤖</span>
+              <h3 style={{ fontSize: 15, fontWeight: 700, color: "white", margin: 0 }}>AI Optimization Analysis</h3>
+            </div>
+            <p style={{ color: "rgba(255,255,255,0.65)", fontSize: 14, lineHeight: 1.8, margin: 0 }}>{aiSummary}</p>
+          </motion.div>
+        )}
+
+        {/* Recommendations */}
+        {recommendations.length > 0 && (
+          <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={4} style={{ marginBottom: 28 }}>
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: "white", marginBottom: 16 }}>💡 Recommendations</h3>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {recommendations.map((rec, i) => {
+                const sev = severityColor[rec.severity] ?? severityColor.medium;
+                return (
+                  <div key={i} style={{ background: sev.bg, border: `1px solid ${sev.border}`, borderRadius: 12, padding: "18px 20px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 8, marginBottom: 8 }}>
+                      <span style={{ color: "white", fontWeight: 700, fontSize: 14 }}>
+                        {rec.tool} <span style={{ color: "rgba(255,255,255,0.4)", fontWeight: 400 }}>({rec.currentPlan} → {rec.recommendedPlan})</span>
+                      </span>
+                      <span style={{ color: "#34d399", fontWeight: 700, fontSize: 14 }}>${rec.monthlySavings}/mo saved</span>
+                    </div>
+                    <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 13, lineHeight: 1.7, margin: 0 }}>{rec.reason}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Tools audited */}
+        {tools.length > 0 && (
+          <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={5}
+            style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 14, padding: 24, marginBottom: 32 }}
+          >
             <h3 style={{ fontSize: 15, fontWeight: 700, color: "white", marginBottom: 16 }}>Tools audited</h3>
-            {formData.rows.map((row) => (
-              <div key={row.id} style={{ display: "flex", justifyContent: "space-between", padding: "10px 0", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
-                <span style={{ color: "white", fontSize: 14 }}>{row.tool} <span style={{ color: "rgba(255,255,255,0.4)" }}>({row.plan})</span></span>
-                <span style={{ color: "rgba(255,255,255,0.6)", fontSize: 14 }}>
-                  ${((parseFloat(row.monthlySpend) || 0) * (parseInt(row.seats) || 1)).toFixed(0)}/mo
-                </span>
-              </div>
-            ))}
-          </div>
+            {tools.map((tool, i) => {
+              const name = tool.name ?? tool.tool;
+              const plan = tool.plan;
+              const cost = (parseFloat(tool.spend ?? tool.monthlySpend) || 0) * (parseInt(tool.seats) || 1);
+              return (
+                <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "10px 0", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+                  <span style={{ color: "white", fontSize: 14 }}>{name} <span style={{ color: "rgba(255,255,255,0.4)" }}>({plan})</span></span>
+                  <span style={{ color: "rgba(255,255,255,0.6)", fontSize: 14 }}>${cost.toFixed(0)}/mo</span>
+                </div>
+              );
+            })}
+          </motion.div>
+        )}
 
+        {/* CTA */}
+        <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={6}>
           <Link to="/">
-            <button style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)", color: "white", border: "none", borderRadius: 10, padding: "12px 24px", fontSize: 14, fontWeight: 700, cursor: "pointer" }}>
-              Run your own audit →
+            <button style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)", color: "white", border: "none", borderRadius: 10, padding: "12px 24px", fontSize: 14, fontWeight: 700, cursor: "pointer", boxShadow: "0 0 20px rgba(99,102,241,0.3)" }}>
+              Run your own free audit →
             </button>
           </Link>
         </motion.div>
