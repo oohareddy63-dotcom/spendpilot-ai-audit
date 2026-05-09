@@ -51,3 +51,21 @@ Need to add MongoDB persistence so audit results survive beyond localStorage. Al
 
 **Plan for tomorrow:**
 Add MongoDB models, persist audit results to DB, implement shareable report links backed by DB, and add Resend email delivery.
+
+---
+
+## Day 4 — 2026-05-09
+
+**Hours worked:** 7
+
+**What I did:**
+Connected MongoDB Atlas via Mongoose with graceful degradation when the URI is not set. Created Audit and Lead models. Built the AI summary service using OpenAI gpt-4o-mini with a deterministic rule-based fallback that produces professional prose without any external API. Implemented the Resend email service with a full HTML template. Updated the audit controller to persist results to MongoDB and attach a UUID share ID. Built the lead capture form on the results page with honeypot anti-spam protection. Updated the SharePage to fetch reports from the API (DB-backed) with a localStorage fallback for offline dev. Added the public share route `GET /api/audit/:shareId` that returns only non-PII fields.
+
+**What I learned:**
+Graceful degradation is critical for a product that depends on multiple external services — OpenAI, MongoDB, and Resend can all fail independently. Every service integration needs a fallback path so the core audit flow never breaks. The honeypot pattern is the simplest effective anti-spam measure that requires zero user friction.
+
+**Blockers / what I'm stuck on:**
+Need to add real MongoDB Atlas URI and Resend API key to .env to activate persistence and email. OpenAI key needed for live AI summaries (fallback works without it).
+
+**Plan for tomorrow:**
+Write Jest tests for the audit engine, add a basic test for the API routes using supertest, and update TESTS.md with coverage documentation.
