@@ -54,24 +54,6 @@ Add MongoDB models, persist audit results to DB, implement shareable report link
 
 ---
 
-## Day 5 — 2026-05-10
-
-**Hours worked:** 6
-
-**What I did:**
-Engineering quality day. Wrote 20 Jest unit tests covering all major audit engine rules, edge cases, and summary shape validation — all passing. Set up GitHub Actions CI that runs tests and builds the frontend on every push to main. Added recharts (pie + bar charts) to the results page for visual spend breakdown. Integrated react-hot-toast for non-intrusive notifications (link copied, report sent, form reset). Improved accessibility across all forms with proper aria labels, roles, and semantic HTML. Made the audit form fully mobile-responsive with a CSS grid fallback for small screens. Added client-side validation with clear error messages. Created `.env.example` for clean onboarding. Updated TESTS.md with full coverage documentation.
-
-**What I learned:**
-Writing tests after the fact forces you to think about edge cases you missed during implementation — the "missing teamSize" and "zero spend" edge cases revealed a potential divide-by-zero in savingsPercent that was already handled but worth explicitly testing. GitHub Actions CI is a 20-line investment that signals serious engineering discipline to any reviewer.
-
-**Blockers / what I'm stuck on:**
-Lighthouse mobile score needs testing in Chrome DevTools. May need to add font preloading and image optimization for performance score.
-
-**Plan for tomorrow:**
-Final polish day — update README with screenshots and setup guide, fill in GTM/ECONOMICS/REFLECTION docs, and prepare the submission package.
-
----
-
 ## Day 4 — 2026-05-09
 
 **Hours worked:** 7
@@ -87,3 +69,21 @@ Need to add real MongoDB Atlas URI and Resend API key to .env to activate persis
 
 **Plan for tomorrow:**
 Write Jest tests for the audit engine, add a basic test for the API routes using supertest, and update TESTS.md with coverage documentation.
+
+---
+
+## Day 5 — 2026-05-10
+
+**Hours worked:** 6
+
+**What I did:**
+Engineering quality day. Wrote 20 Jest unit tests covering all major audit engine rules, edge cases, and summary shape validation — all passing. Set up GitHub Actions CI that runs tests and builds the frontend on every push to main. Added recharts (pie + bar charts) to the results page for visual spend breakdown. Integrated react-hot-toast for non-intrusive notifications (link copied, report sent, form reset). Improved accessibility across all forms with proper aria labels, roles, and semantic HTML. Made the audit form fully mobile-responsive with a CSS grid fallback for small screens. Added client-side validation with clear error messages. Created `.env.example` for clean onboarding. Updated TESTS.md with full coverage documentation.
+
+**What I learned:**
+Writing tests after the fact forces you to think about edge cases you missed during implementation — the "missing teamSize" and "zero spend" edge cases revealed a potential divide-by-zero in savingsPercent that was already handled but worth explicitly testing. GitHub Actions CI is a 20-line investment that signals serious engineering discipline to any reviewer.
+
+**Blockers / what I'm stuck on:**
+Lighthouse mobile score needs testing in Chrome DevTools. May need to add font preloading and image optimization for performance score.
+
+**Plan for tomorrow:**
+Final polish day — update README with screenshots and setup guide, fill in GTM/ECONOMICS/REFLECTION docs, and prepare the submission package.
