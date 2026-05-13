@@ -36,6 +36,17 @@ SpendPilot helps engineering teams and founders identify wasteful AI tool subscr
 | Deploy | Vercel (frontend) + Render (backend) |
 
 ---
+**##Screenshots**
+<img width="1877" height="897" alt="Screenshot 2026-05-13 222549" src="https://github.com/user-attachments/assets/ea249ae3-ebb6-4b29-87b2-7961ebb379cc" />
+
+<img width="1860" height="822" alt="Screenshot 2026-05-13 222610" src="https://github.com/user-attachments/assets/7ae229d1-da43-433c-aa9c-f003949badf8" />
+
+<img width="1912" height="893" alt="Screenshot 2026-05-13 222530" src="https://github.com/user-attachments/assets/6f76a5ee-11c4-4af1-bc86-bba7a3ba6ad1" />
+
+<img width="1883" height="946" alt="Screenshot 2026-05-13 222426" src="https://github.com/user-attachments/assets/90eb7c18-0249-410a-8c4e-2b23d6881ecf" />
+
+<img width="1875" height="982" alt="Screenshot 2026-05-13 222444" src="https://github.com/user-attachments/assets/bb715f5e-d2e0-4f56-946d-656a5aea9db2" />
+
 
 ## Getting Started
 
