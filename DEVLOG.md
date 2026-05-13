@@ -126,26 +126,18 @@ Resumed engineering tasks with full focus — completed all remaining documentat
 
 ---
 
-## Day 8 — 2026-05-13 (Submission Day)
+## Day 8 — 2026-05-13
 
 **Hours worked:** 8
 
 **What I did:**
-Final submission day. Completed all remaining work end-to-end: connected MongoDB Atlas (live, verified), integrated Groq llama-3.3-70b as the AI summary engine (free, fast, working), completed all 12 required markdown documentation files (README, ARCHITECTURE with Mermaid diagram, REFLECTION, PROMPTS, GTM, ECONOMICS, USER_INTERVIEWS, LANDING_COPY, METRICS, TESTS, PRICING_DATA, DEVLOG), extended the audit engine with rules for Gemini and Windsurf, verified 20/20 Jest tests passing, confirmed GitHub Actions CI green, and ran full end-to-end API tests confirming the complete user flow works — form submission → audit engine → Groq AI summary → MongoDB persistence → shareable report link → lead capture. The product is fully functional and submitted.
+Final submission day. Connected MongoDB Atlas (live, verified), integrated Groq llama-3.3-70b as the AI summary engine, completed all 12 required markdown documentation files, added vendor URLs to PRICING_DATA.md, added OG meta tags to the share page for Twitter card previews, justified plain JavaScript in ARCHITECTURE.md, fixed CORS for production deployment, and verified the full end-to-end flow on the live Vercel URL. 20/20 Jest tests passing, GitHub Actions CI green, product fully functional and submitted.
 
 **What I learned:**
-Honest documentation of blockers and low-productivity days is more credible than a suspiciously perfect streak. Real engineering projects always have interruptions — what matters is how you document and recover from them. The most important engineering discipline is shipping a working, tested, documented product — not a perfect one.
+Honest documentation of blockers and low-productivity days is more credible than a suspiciously perfect streak. Real engineering projects always have interruptions — what matters is how you document and recover from them.
 
 **Blockers / what I'm stuck on:**
-Resend email delivery requires a paid domain — currently skipped gracefully. Deployment to Vercel/Render is the remaining step for a fully public live URL.
+Resend transactional email requires a verified sending domain — currently the key is configured but emails skip gracefully without a verified domain. This is documented as a known limitation.
 
-**Submission status:**
-✅ MERN full stack working end-to-end  
-✅ 15 AI tools supported with 22+ audit rules  
-✅ Groq AI-generated executive summaries  
-✅ MongoDB Atlas persistence with shareable report links  
-✅ Lead capture with honeypot anti-spam  
-✅ 20 Jest unit tests, all passing  
-✅ GitHub Actions CI configured  
-✅ All 12 documentation files complete  
-✅ Submitted for Credex AI Engineering Challenge
+**Plan for tomorrow:**
+This is the final submission. If shortlisted for Round 2, first priorities would be: TypeScript migration, Resend domain verification for live email, and Lighthouse performance optimization.

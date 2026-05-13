@@ -142,6 +142,8 @@ The engine (`services/auditEngine.js`) is intentionally **deterministic and rule
 
 ## Why MERN?
 
+Plain JavaScript was chosen over TypeScript deliberately for this 7-day build: the audit engine is a pure data-transformation pipeline with no complex type hierarchies, the rule objects are uniform enough that JSDoc comments provide sufficient IDE support, and eliminating the TypeScript compilation step reduced build complexity during rapid iteration. In a week-2 continuation, migrating to TypeScript would be the first refactor — the `runAudit` function signature and the Mongoose models are the natural starting points.
+
 | Criterion | Decision |
 |-----------|---------|
 | Speed of development | React + Express is the fastest stack for a 7-day build |
