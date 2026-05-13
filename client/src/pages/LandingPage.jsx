@@ -14,7 +14,30 @@ const fadeUp = {
 const stats = [
   { value: "$4,200", label: "Avg. annual savings" },
   { value: "3 min", label: "To complete audit" },
-  { value: "10+", label: "AI tools supported" },
+  { value: "15+", label: "AI tools supported" },
+];
+
+const faqs = [
+  {
+    q: "Is this really free?",
+    a: "Yes. The audit is completely free. No credit card, no account required. You get the full report instantly.",
+  },
+  {
+    q: "How does the audit engine work?",
+    a: "We compare your reported spend against official benchmark pricing for each tool and plan. Our rule engine detects overprovisioned plans, duplicate tools, and team-size mismatches — then calculates exact monthly and annual savings.",
+  },
+  {
+    q: "Which AI tools do you support?",
+    a: "We currently support Cursor, ChatGPT, Claude, GitHub Copilot, Gemini, OpenAI API, Anthropic API, Windsurf, v0, Midjourney, Perplexity, Notion, Linear, Vercel, and GitHub — with more being added regularly.",
+  },
+  {
+    q: "Is my data stored?",
+    a: "Audit results are stored anonymously to generate your shareable report link. We never sell your data. If you submit your email for the report, it is stored securely and used only to send your audit.",
+  },
+  {
+    q: "What if I don't know my exact spend?",
+    a: "Use your best estimate. The audit engine compares your input against official plan pricing, so even approximate numbers will surface meaningful savings opportunities.",
+  },
 ];
 
 const features = [
@@ -407,6 +430,53 @@ export default function LandingPage() {
               </motion.div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ── FAQ ── */}
+      <section
+        id="faq"
+        style={{ padding: "100px 24px", maxWidth: 760, margin: "0 auto" }}
+      >
+        <motion.div
+          variants={fadeUp}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          style={{ textAlign: "center", marginBottom: 56 }}
+        >
+          <p style={{ color: "#6366f1", fontWeight: 600, fontSize: 13, letterSpacing: "1px", textTransform: "uppercase", marginBottom: 12 }}>
+            FAQ
+          </p>
+          <h2 style={{ fontSize: "clamp(26px, 4vw, 40px)", fontWeight: 800, letterSpacing: "-0.8px", color: "white" }}>
+            Common questions
+          </h2>
+        </motion.div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          {faqs.map((faq, i) => (
+            <motion.div
+              key={i}
+              variants={fadeUp}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              custom={i}
+              style={{
+                background: "rgba(255,255,255,0.03)",
+                border: "1px solid rgba(255,255,255,0.08)",
+                borderRadius: 14,
+                padding: "22px 24px",
+              }}
+            >
+              <h3 style={{ fontSize: 15, fontWeight: 700, color: "white", marginBottom: 10 }}>
+                {faq.q}
+              </h3>
+              <p style={{ fontSize: 14, color: "rgba(255,255,255,0.55)", lineHeight: 1.75, margin: 0 }}>
+                {faq.a}
+              </p>
+            </motion.div>
+          ))}
         </div>
       </section>
 
