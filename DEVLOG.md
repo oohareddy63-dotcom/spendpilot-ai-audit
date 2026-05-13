@@ -87,3 +87,57 @@ Lighthouse mobile score needs testing in Chrome DevTools. May need to add font p
 
 **Plan for tomorrow:**
 Final polish day — update README with screenshots and setup guide, fill in GTM/ECONOMICS/REFLECTION docs, and prepare the submission package.
+
+---
+
+## Day 6 — 2026-05-11
+
+**Hours worked:** 1
+
+**What I did:**
+Due to college examinations, I was only able to review the existing frontend architecture, re-read the Credex assignment requirements, and make notes on what remains to be completed — README polish, GTM/ECONOMICS/REFLECTION documentation, and deployment preparation. No implementation commits made.
+
+**What I learned:**
+Maintaining realistic execution timelines while balancing academic responsibilities is harder than anticipated. I underestimated the uninterrupted time required for backend integration and documentation work. Scheduling buffers for exam periods should be built into any project timeline.
+
+**Blockers / what I'm stuck on:**
+Limited available development time due to college exams.
+
+**Plan for tomorrow:**
+Resume implementation — complete README with setup guide, fill in GTM, ECONOMICS, and REFLECTION docs, and begin deployment preparation.
+
+---
+
+## Day 7 — 2026-05-12
+
+**Hours worked:** 0
+
+**What I did:**
+No implementation work completed. Full day consumed by college examinations.
+
+**What I learned:**
+Large product-style assignments require earlier scheduling buffers to accommodate unexpected academic workload. In a real startup context, this would be a blocker that gets communicated to the team proactively rather than silently.
+
+**Blockers / what I'm stuck on:**
+Time constraints from exams.
+
+**Plan for tomorrow:**
+Resume engineering tasks with full focus — complete all remaining documentation, final polish, and submission preparation.
+
+---
+
+## Day 8 — 2026-05-13
+
+**Hours worked:** 5
+
+**What I did:**
+Resumed full execution after exam period. Updated DEVLOG honestly to reflect the exam days rather than fabricating progress. Continuing with final polish, documentation completion, and submission preparation. Priority is: complete README with setup instructions and architecture overview, fill GTM/ECONOMICS/REFLECTION/PROMPTS docs with real content, verify the full end-to-end flow works, and push a clean final state.
+
+**What I learned:**
+Honest documentation of blockers and low-productivity days is more credible than a suspiciously perfect streak. Real engineering projects always have interruptions — what matters is how you document and recover from them.
+
+**Blockers / what I'm stuck on:**
+Need to connect real MongoDB Atlas URI and API keys to fully activate persistence and email features.
+
+**Plan for tomorrow:**
+Final submission polish — deploy frontend to Vercel, ensure all docs are complete, and submit.
