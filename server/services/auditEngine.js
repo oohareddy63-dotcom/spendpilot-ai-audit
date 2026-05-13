@@ -6,23 +6,29 @@
 
 // Official / benchmark monthly pricing per seat (USD)
 const PRICING = {
-  Cursor:     { Hobby: 0,   Pro: 20,  Business: 40,  Enterprise: 60 },
-  ChatGPT:    { Plus: 20,   Team: 30, Enterprise: 60, API: 0 },
-  Claude:     { Free: 0,    Pro: 20,  Max: 100, Team: 30, Enterprise: 60 },
-  Copilot:    { Individual: 10, Business: 19, Enterprise: 39 },
-  Midjourney: { Basic: 10,  Standard: 30, Pro: 60, Mega: 120 },
-  Perplexity: { Free: 0,    Pro: 20,  Enterprise: 40 },
-  Notion:     { Free: 0,    Plus: 10, Business: 15, Enterprise: 25 },
-  Linear:     { Free: 0,    Standard: 8, Plus: 14, Enterprise: 22 },
-  Vercel:     { Hobby: 0,   Pro: 20,  Enterprise: 40 },
-  GitHub:     { Free: 0,    Team: 4,  Enterprise: 21 },
+  Cursor:          { Hobby: 0,   Pro: 20,  Business: 40,  Enterprise: 60 },
+  ChatGPT:         { Plus: 20,   Team: 30, Enterprise: 60, API: 0 },
+  Claude:          { Free: 0,    Pro: 20,  Max: 100, Team: 30, Enterprise: 60 },
+  Copilot:         { Individual: 10, Business: 19, Enterprise: 39 },
+  Gemini:          { Free: 0,    Advanced: 20, Business: 24, Enterprise: 30 },
+  "OpenAI API":    { "Pay-as-you-go": 0, "Tier 1": 0, "Tier 2": 0, "Tier 3": 0, "Tier 4": 0, "Tier 5": 0 },
+  "Anthropic API": { "Pay-as-you-go": 0, Build: 0, Scale: 0, Enterprise: 0 },
+  Windsurf:        { Free: 0,    Pro: 15,  Teams: 30, Enterprise: 50 },
+  "v0 by Vercel":  { Free: 0,    Premium: 20, Team: 30 },
+  Midjourney:      { Basic: 10,  Standard: 30, Pro: 60, Mega: 120 },
+  Perplexity:      { Free: 0,    Pro: 20,  Enterprise: 40 },
+  Notion:          { Free: 0,    Plus: 10, Business: 15, Enterprise: 25 },
+  Linear:          { Free: 0,    Standard: 8, Plus: 14, Enterprise: 22 },
+  Vercel:          { Hobby: 0,   Pro: 20,  Enterprise: 40 },
+  GitHub:          { Free: 0,    Team: 4,  Enterprise: 21 },
 };
 
 // Tools that overlap significantly in functionality
 const OVERLAP_GROUPS = [
-  { tools: ["ChatGPT", "Claude"], label: "general-purpose AI assistants" },
-  { tools: ["Cursor", "Copilot"], label: "AI coding assistants" },
+  { tools: ["ChatGPT", "Claude", "Gemini"], label: "general-purpose AI assistants" },
+  { tools: ["Cursor", "Copilot", "Windsurf"], label: "AI coding assistants" },
   { tools: ["Notion", "Linear"], label: "project management / docs tools" },
+  { tools: ["OpenAI API", "Anthropic API"], label: "AI API providers" },
 ];
 
 /**
@@ -267,7 +273,7 @@ function runAudit({ tools, teamSize, useCase }) {
   });
 
   // ── RULE 15: Duplicate coding assistants ────────────────────────────────────
-  const codingTools = toolNames.filter((n) => ["Cursor", "Copilot"].includes(n));
+  const codingTools = toolNames.filter((n) => ["Cursor", "Copilot", "Windsurf"].includes(n));
   if (codingTools.length >= 2) {
     const cheaperTool = tools
       .filter((t) => codingTools.includes(t.name))
@@ -288,7 +294,7 @@ function runAudit({ tools, teamSize, useCase }) {
   }
 
   // ── RULE 16: Duplicate general AI assistants ────────────────────────────────
-  const aiAssistants = toolNames.filter((n) => ["ChatGPT", "Claude"].includes(n));
+  const aiAssistants = toolNames.filter((n) => ["ChatGPT", "Claude", "Gemini"].includes(n));
   if (aiAssistants.length >= 2) {
     const costs = tools
       .filter((t) => aiAssistants.includes(t.name))
@@ -349,6 +355,53 @@ function runAudit({ tools, teamSize, useCase }) {
       });
       totalMonthlySavings += savings;
     }
+  }
+
+  // ── RULE 20a: Gemini Advanced for non-Google-Workspace teams ────────────────
+  const geminiTool = tools.find((t) => t.name === "Gemini");
+  if (geminiTool && geminiTool.plan === "Advanced" && parseInt(geminiTool.seats) <= 2) {
+    const savings = 20 * (parseInt(geminiTool.seats) || 1);
+    recommendations.push({
+      tool: "Gemini",
+      currentPlan: "Advanced",
+      recommendedPlan: "Free",
+      monthlySavings: savings,
+      reason:
+        "Gemini Advanced ($20/seat) overlaps heavily with ChatGPT Plus and Claude Pro. For teams already paying for another general-purpose AI assistant, Gemini Free provides sufficient capability for most tasks.",
+      severity: "medium",
+    });
+    totalMonthlySavings += savings;
+  }
+
+  // ── RULE 20b: Windsurf Pro overkill when Cursor/Copilot already present ─────
+  const windsurfTool = tools.find((t) => t.name === "Windsurf" && (t.plan === "Pro" || t.plan === "Teams"));
+  const hasOtherCodingTool = toolNames.some((n) => ["Cursor", "Copilot"].includes(n));
+  if (windsurfTool && hasOtherCodingTool) {
+    const windsurfCost = (parseFloat(windsurfTool.spend) || 0) * (parseInt(windsurfTool.seats) || 1);
+    flags.push({
+      tool: "Windsurf + " + toolNames.filter((n) => ["Cursor", "Copilot"].includes(n)).join("/"),
+      type: "overlap",
+      message: `Your team is paying for Windsurf alongside ${toolNames.filter((n) => ["Cursor", "Copilot"].includes(n)).join(" and ")}. All three are AI coding assistants with near-identical core functionality. Consolidating to one tool could save ~$${windsurfCost}/mo.`,
+      potentialSavings: windsurfCost,
+      severity: "high",
+    });
+    totalMonthlySavings += windsurfCost;
+  }
+
+  // ── RULE 20c: v0 Team for solo users ────────────────────────────────────────
+  const v0Tool = tools.find((t) => t.name === "v0 by Vercel" && t.plan === "Team");
+  if (v0Tool && parseInt(v0Tool.seats) <= 2) {
+    const savings = (30 - 20) * (parseInt(v0Tool.seats) || 1);
+    recommendations.push({
+      tool: "v0 by Vercel",
+      currentPlan: "Team",
+      recommendedPlan: "Premium",
+      monthlySavings: savings,
+      reason:
+        "v0 Team plan is designed for collaborative design workflows with multiple contributors. For 1–2 users, the Premium plan provides the same generation credits at a lower per-seat cost.",
+      severity: "low",
+    });
+    totalMonthlySavings += savings;
   }
 
   // ── RULE 20: High absolute spend with no enterprise-grade tools ─────────────
