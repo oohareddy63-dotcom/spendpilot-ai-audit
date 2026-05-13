@@ -2,8 +2,8 @@
 
 > AI-powered SaaS spend audit tool — built for the Credex 7-day engineering challenge.
 
-**Live demo:** _Deploy URL here (Vercel)_  
-**Backend API:** _Deploy URL here (Render)_
+**Live demo:** https://spendpilot-ai-audit.vercel.app/
+**Backend API:** https://spendpilot-ai-audit.onrender.com
 
 ---
 
