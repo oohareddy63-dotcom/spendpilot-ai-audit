@@ -47,6 +47,8 @@ SpendPilot helps engineering teams and founders identify wasteful AI tool subscr
 
 <img width="1875" height="982" alt="Screenshot 2026-05-13 222444" src="https://github.com/user-attachments/assets/bb715f5e-d2e0-4f56-946d-656a5aea9db2" />
 
+<img width="1446" height="881" alt="Screenshot 2026-05-13 222148" src="https://github.com/user-attachments/assets/f58a90f1-05f7-4636-8c03-e81517b9d9cb" />
+
 
 ## Getting Started
 
